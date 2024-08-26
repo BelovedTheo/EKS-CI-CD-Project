@@ -244,7 +244,7 @@ resource "aws_eks_node_group" "public" {
   cluster_name    = aws_eks_cluster.main.name
   node_group_name = "${var.project_name}-public-node-group"
   node_role_arn   = aws_iam_role.eks_nodes.arn
-  subnet_ids      = [aws_subnet.public.id]
+  subnet_ids      = [aws_subnet.Public_Subnet_A.id]
 
   scaling_config {
     desired_size = 1
@@ -261,7 +261,7 @@ resource "aws_eks_node_group" "private" {
   cluster_name    = aws_eks_cluster.main.name
   node_group_name = "${var.project_name}-private-node-group"
   node_role_arn   = aws_iam_role.eks_nodes.arn
-  subnet_ids      = [aws_subnet.private.id]
+  subnet_ids      = [aws_subnet.Private_Subnet_A.id]
 
   scaling_config {
     desired_size = 1
@@ -280,7 +280,7 @@ resource "aws_lb" "app" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb_sg.id]
-  subnets            = [aws_subnet.public.id]
+  subnets            = [aws_subnet.Public_Subnet_A.id]
 
   enable_deletion_protection = false
 }
