@@ -24,16 +24,8 @@ resource "aws_vpc" "VPC_Pipeline" {
   }
 }
 
-# Create Internet Gateway and Automatically Attach
-resource "aws_internet_gateway" "IG_Pipeline" {
-  vpc_id = aws_vpc.VPC_Pipeline.id
-  tags = {
-    Name = "IG EKS CI/CD"
-  }
-}
-
-# Create 2 Public Subnets in Availability Zones: A
-resource "aws_subnet" "Subnet_A" {
+# Create  Public Subnet in Availability Zones: A
+resource "aws_subnet" "Public_Subnet_A" {
   vpc_id            = aws_vpc.VPC_Pipeline.id
   cidr_block        = "10.0.1.0/24"
   availability_zone = "${var.Region}a"
@@ -44,21 +36,11 @@ resource "aws_subnet" "Subnet_A" {
   }
 }
 
-resource "aws_subnet" "Subnet_B" {
-  vpc_id            = aws_vpc.VPC_Pipeline.id
-  cidr_block        = "10.0.2.0/24"
-  availability_zone = "${var.Region}a"
-  # Enable Auto-assigned IPv4
-  map_public_ip_on_launch = true
-  tags = {
-    Name = "Public Subnet 2"
-  }
-}
 
-#Create 2 Private Subnets in Availability Zones: A
+#Create  Private Subnet in Availability Zones: A
 resource "aws_subnet" "Private_Subnet_A" {
   vpc_id            = aws_vpc.VPC_Pipeline.id
-  cidr_block        = "10.0.3.0/24"
+  cidr_block        = "10.0.2.0/24"
   availability_zone = "${var.Region}a"
   # Disable Auto-assigned IPv4
   map_public_ip_on_launch = false
@@ -67,18 +49,24 @@ resource "aws_subnet" "Private_Subnet_A" {
   }
 }
 
-resource "aws_subnet" "Private_Subnet_B" {
-  vpc_id            = aws_vpc.VPC_Pipeline.id
-  cidr_block        = "10.0.4.0/24"
-  availability_zone = "${var.Region}a"
-  # Disable Auto-assigned IPv4
-  map_public_ip_on_launch = false
+# Create Internet Gateway and NAT Gateway
+resource "aws_internet_gateway" "IG_Pipeline" {
+  vpc_id = aws_vpc.VPC_Pipeline.id
   tags = {
-    Name = "Private Subnet 2"
+    Name = "IG EKS CI/CD"
   }
 }
 
-# Create Route Table for Subnets
+resource "aws_eip" "nat" {
+  domain = "vpc"
+}
+
+resource "aws_nat_gateway" "nat" {
+  allocation_id = aws_eip.nat.id
+  subnet_id     = aws_subnet.Public_Subnet_A.id
+}
+
+# Create Route Table for Subnet
 resource "aws_route_table" "Public_RouteTable" {
   vpc_id = aws_vpc.VPC_Pipeline.id
   route {
@@ -94,15 +82,24 @@ resource "aws_route_table" "Public_RouteTable" {
   }
 }
 
+resource "aws_route_table" "Private_RouteTable" {
+  vpc_id = aws_vpc.VPC_Pipeline.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat.id
+  }
+}
+
 # Attach Subnets to Route Table
-resource "aws_route_table_association" "RouteTable_Attach_Subnet_A" {
-  subnet_id      = aws_subnet.Subnet_A.id
+resource "aws_route_table_association" "public_subnet" {
+  subnet_id      = aws_subnet.Public_Subnet_A.id
   route_table_id = aws_route_table.Public_RouteTable.id
 }
 
-resource "aws_route_table_association" "RouteTable_Attach_Subnet_B" {
-  subnet_id      = aws_subnet.Subnet_B.id
-  route_table_id = aws_route_table.Public_RouteTable.id
+resource "aws_route_table_association" "private_subnet" {
+  subnet_id      = aws_subnet.Private_Subnet_A.id
+  route_table_id = aws_route_table.Private_RouteTable.id
 }
 
 # Security Groups
