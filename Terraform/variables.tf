@@ -2,6 +2,13 @@
 #EKS CI/CD Pipeline Project
 #Created by Vladimir Ziulin
 #---------------------------
+
+variable "project_name" {
+  description = "Project name for tagging and resource naming"
+  type        = string
+  default     = "EKS CI/CD Pipeline"
+}
+
 variable "Region" {
   type        = string
   description = "AWS Region to work"

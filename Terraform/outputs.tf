@@ -46,3 +46,18 @@ output "cluster_name" {
   description = "Kubernetes Cluster Name"
   value       = var.cluster_name
 }
+
+output "Public_A_ID" {
+  value       = aws_subnet.Public_A.id
+  description = "Public Subnet A ID of VPC"
+}
+
+output "Public_B_ID" {
+  value       = aws_subnet.Public_B.id
+  description = "Public Subnet B ID of VPC"
+}
+
+output "private_subnet_ids" {
+  description = "List of private subnet IDs"
+  value       = aws_subnet.private[*].id
+}
