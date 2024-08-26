@@ -15,11 +15,6 @@ variable "project_name" {
   default     = "EKS CI/CD Pipeline"
 }
 
-variable "cluster_name" {
-  description = "EKS cluster name"
-  default     = "eks-cluster-${random_string.suffix.result}"
-}
-
 variable "Instance_type" {
   type        = string
   description = "EC2 Instance type"

@@ -4,6 +4,7 @@
 #---------------------------
 
 #Work with AWS
+
 provider "aws" {
   region = var.Region
   default_tags {
@@ -14,9 +15,8 @@ provider "aws" {
   }
 }
 
-#-----------VPC-------------
-
 # Create VPC
+
 resource "aws_vpc" "VPC_Pipeline" {
   cidr_block = var.CIDR_VPC
   tags = {
@@ -25,6 +25,7 @@ resource "aws_vpc" "VPC_Pipeline" {
 }
 
 # Create  Public Subnet in Availability Zones: A
+
 resource "aws_subnet" "Public_Subnet_A" {
   vpc_id            = aws_vpc.VPC_Pipeline.id
   cidr_block        = "10.0.1.0/24"
@@ -38,6 +39,7 @@ resource "aws_subnet" "Public_Subnet_A" {
 
 
 #Create  Private Subnet in Availability Zones: A
+
 resource "aws_subnet" "Private_Subnet_A" {
   vpc_id            = aws_vpc.VPC_Pipeline.id
   cidr_block        = "10.0.2.0/24"
@@ -50,6 +52,7 @@ resource "aws_subnet" "Private_Subnet_A" {
 }
 
 # Create Internet Gateway and NAT Gateway
+
 resource "aws_internet_gateway" "IG_Pipeline" {
   vpc_id = aws_vpc.VPC_Pipeline.id
   tags = {
@@ -67,6 +70,7 @@ resource "aws_nat_gateway" "nat" {
 }
 
 # Create Route Table for Subnet
+
 resource "aws_route_table" "Public_RouteTable" {
   vpc_id = aws_vpc.VPC_Pipeline.id
   route {
@@ -92,17 +96,19 @@ resource "aws_route_table" "Private_RouteTable" {
 }
 
 # Attach Subnets to Route Table
-resource "aws_route_table_association" "public_subnet" {
+
+resource "aws_route_table_association" "public" {
   subnet_id      = aws_subnet.Public_Subnet_A.id
   route_table_id = aws_route_table.Public_RouteTable.id
 }
 
-resource "aws_route_table_association" "private_subnet" {
+resource "aws_route_table_association" "private" {
   subnet_id      = aws_subnet.Private_Subnet_A.id
   route_table_id = aws_route_table.Private_RouteTable.id
 }
 
 # Security Groups
+
 resource "aws_security_group" "sg_eks_cluster" {
   name        = "SG EKS Cluster"
   description = "Security Group for EKS Cluster, Nodes, ALB, and Monitoring"
@@ -147,7 +153,9 @@ resource "aws_security_group" "sg_eks_cluster" {
     Project = var.project_name
   }
 }
+
 # Security Group MongoDB
+
 resource "aws_security_group" "sg_mongodb" {
   name        = "SG MongoDB"
   description = "Security Group for MongoDB"
@@ -173,4 +181,95 @@ resource "aws_security_group" "sg_mongodb" {
     Name    = "SG MongoDB ${var.project_name}"
     Project = var.project_name
   }
+}
+
+# EKS cluster
+
+resource "aws_eks_cluster" "main" {
+  name     = "EKS cluster name"
+  role_arn = aws_iam_role.eks_cluster.arn
+
+  vpc_config {
+    subnet_ids = [aws_subnet.Public_Subnet_A.id, aws_subnet.Private_Subnet_A.id]
+  }
+
+  depends_on = [aws_iam_role_policy_attachment.eks_cluster_policy]
+}
+
+resource "aws_iam_role" "eks_cluster" {
+  name = "eks-cluster-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "eks.amazonaws.com"
+        }
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+  role       = aws_iam_role.eks_cluster.name
+}
+
+resource "aws_iam_role" "eks_nodes" {
+  name = "eks-nodes-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "eks_worker_node_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+  role       = aws_iam_role.eks_nodes.name
+}
+
+resource "aws_eks_node_group" "public" {
+  cluster_name    = aws_eks_cluster.main.name
+  node_group_name = "${var.project_name}-public-node-group"
+  node_role_arn   = aws_iam_role.eks_nodes.arn
+  subnet_ids      = [aws_subnet.public.id]
+
+  scaling_config {
+    desired_size = 1
+    max_size     = 1
+    min_size     = 1
+  }
+
+  instance_types = ["t3.medium"]
+
+  depends_on = [aws_iam_role_policy_attachment.eks_worker_node_policy]
+}
+
+resource "aws_eks_node_group" "private" {
+  cluster_name    = aws_eks_cluster.main.name
+  node_group_name = "${var.project_name}-private-node-group"
+  node_role_arn   = aws_iam_role.eks_nodes.arn
+  subnet_ids      = [aws_subnet.private.id]
+
+  scaling_config {
+    desired_size = 1
+    max_size     = 1
+    min_size     = 1
+  }
+
+  instance_types = ["t3.medium"]
+
+  depends_on = [aws_iam_role_policy_attachment.eks_worker_node_policy]
 }

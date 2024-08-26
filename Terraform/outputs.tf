@@ -42,11 +42,6 @@ output "Region" {
   value       = var.Region
 }
 
-output "cluster_name" {
-  description = "Kubernetes Cluster Name"
-  value       = var.cluster_name
-}
-
 output "Public_A_ID" {
   value       = aws_subnet.Public_A.id
   description = "Public Subnet A ID of VPC"
