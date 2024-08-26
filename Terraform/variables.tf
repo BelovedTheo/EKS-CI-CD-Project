@@ -3,16 +3,16 @@
 #Created by Vladimir Ziulin
 #---------------------------
 
-variable "project_name" {
-  description = "Project name for tagging and resource naming"
-  type        = string
-  default     = "EKS CI/CD Pipeline"
-}
-
 variable "Region" {
   type        = string
   description = "AWS Region to work"
   default     = "us-west-2"
+}
+
+variable "project_name" {
+  description = "Project name for tagging and resource naming"
+  type        = string
+  default     = "EKS CI/CD Pipeline"
 }
 
 variable "cluster_name" {

@@ -32,7 +32,7 @@ resource "aws_internet_gateway" "IG_Pipeline" {
   }
 }
 
-# Create 2 Public Subnets in different Availability Zones: A, B
+# Create 2 Public Subnets in Availability Zones: A
 resource "aws_subnet" "Subnet_A" {
   vpc_id            = aws_vpc.VPC_Pipeline.id
   cidr_block        = "10.0.1.0/24"
@@ -47,7 +47,7 @@ resource "aws_subnet" "Subnet_A" {
 resource "aws_subnet" "Subnet_B" {
   vpc_id            = aws_vpc.VPC_Pipeline.id
   cidr_block        = "10.0.2.0/24"
-  availability_zone = "${var.Region}b"
+  availability_zone = "${var.Region}a"
   # Enable Auto-assigned IPv4
   map_public_ip_on_launch = true
   tags = {
@@ -55,7 +55,7 @@ resource "aws_subnet" "Subnet_B" {
   }
 }
 
-#Create 2 Private Subnets in different Availability Zones: A, B
+#Create 2 Private Subnets in Availability Zones: A
 resource "aws_subnet" "Private_Subnet_A" {
   vpc_id            = aws_vpc.VPC_Pipeline.id
   cidr_block        = "10.0.3.0/24"
@@ -70,7 +70,7 @@ resource "aws_subnet" "Private_Subnet_A" {
 resource "aws_subnet" "Private_Subnet_B" {
   vpc_id            = aws_vpc.VPC_Pipeline.id
   cidr_block        = "10.0.4.0/24"
-  availability_zone = "${var.Region}b"
+  availability_zone = "${var.Region}a"
   # Disable Auto-assigned IPv4
   map_public_ip_on_launch = false
   tags = {
@@ -104,7 +104,6 @@ resource "aws_route_table_association" "RouteTable_Attach_Subnet_B" {
   subnet_id      = aws_subnet.Subnet_B.id
   route_table_id = aws_route_table.Public_RouteTable.id
 }
-#-----------EC2-------------
 
 # Security Groups
 resource "aws_security_group" "sg_eks_cluster" {
