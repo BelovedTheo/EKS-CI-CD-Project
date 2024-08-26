@@ -11,7 +11,7 @@ phases:
   pre_build:
     commands:
       - echo "Building Docker image..."
-      - docker build -t pacman1 .
+      - docker build -t pacman1 -f Application/docker/Dockerfile .
 
   build:
     commands:
