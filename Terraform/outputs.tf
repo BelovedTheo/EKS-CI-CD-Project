@@ -56,3 +56,8 @@ output "private_subnet_ids" {
   description = "List of private subnet IDs"
   value       = aws_subnet.private[*].id
 }
+
+output "alb_dns_name" {
+  description = "The DNS name of the load balancer"
+  value       = aws_lb.app.dns_name
+}

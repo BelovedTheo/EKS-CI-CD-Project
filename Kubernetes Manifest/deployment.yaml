@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: APPdeployment
+spec:
+  replicas: 1
+  selector: 
+    matchLabels:
+      app: pacman1
+  template:
+    metadata:
+      labels:
+        app: pacman1
+    spec:
+      containers:
+      - name: pacman1
+        image: 767397938697.dkr.ecr.us-west-2.amazonaws.com/pacman1:latest
+        ports:
+        - containerPort: 80
