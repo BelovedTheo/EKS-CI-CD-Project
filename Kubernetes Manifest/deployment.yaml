@@ -17,3 +17,8 @@ spec:
         image: 767397938697.dkr.ecr.us-west-2.amazonaws.com/pacman1:latest
         ports:
         - containerPort: 80
+        env:
+        - name: MONGO_URL
+          value: "mongodb://DBservice:27017/mydatabase"
+      imagePullSecrets:
+      - name: ecr-secret
