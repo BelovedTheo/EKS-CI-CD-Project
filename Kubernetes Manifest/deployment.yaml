@@ -4,7 +4,7 @@ metadata:
   name: APPdeployment
 spec:
   replicas: 1
-  selector: 
+  selector:
     matchLabels:
       app: pacman1
   template:

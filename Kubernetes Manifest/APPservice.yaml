@@ -3,10 +3,10 @@ kind: Service
 metadata:
   name: APPservice
 spec:
-  selector: pacman1
-    app:
+  selector:
+    app: pacman1
   ports:
-  - protocol: TCP
-    port: 80
-    targetPort: 80
+    - protocol: TCP
+      port: 80
+      targetPort: 80
   type: LoadBalancer
