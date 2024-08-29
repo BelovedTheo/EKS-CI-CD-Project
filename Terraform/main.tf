@@ -157,7 +157,7 @@ resource "aws_security_group" "sg_eks_cluster" {
 # Security Group MongoDB
 
 resource "aws_security_group" "sg_mongodb" {
-  name        = "SG MongoDB"
+  name        = "SGMongoDB"
   description = "Security Group for MongoDB"
   vpc_id      = aws_vpc.VPC_Pipeline.id
 
@@ -186,7 +186,7 @@ resource "aws_security_group" "sg_mongodb" {
 # EKS cluster with IAM roles
 
 resource "aws_eks_cluster" "main" {
-  name     = "EKS cluster name"
+  name     = "EKScluster"
   role_arn = aws_iam_role.eks_cluster.arn
 
   vpc_config {

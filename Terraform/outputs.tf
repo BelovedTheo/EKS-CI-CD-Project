@@ -42,6 +42,11 @@ output "Region" {
   value       = var.Region
 }
 
+output "vpc_id" {
+  value = aws_vpc.VPC_Pipeline.id
+  description = "The ID of the VPC"
+}
+
 output "Public_A_ID" {
   value       = aws_subnet.Public_A.id
   description = "Public Subnet A ID of VPC"
