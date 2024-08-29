@@ -16,4 +16,4 @@ spec:
           service:
             name: pacman-service
             port:
-              number: 32683
+              number: 80
