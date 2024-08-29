@@ -37,12 +37,25 @@ resource "aws_subnet" "Public_Subnet_A" {
   }
 }
 
+# Create  Public Subnet in Availability Zones: B
+
+resource "aws_subnet" "Public_Subnet_B" {
+  vpc_id            = aws_vpc.VPC_Pipeline.id
+  cidr_block        = "10.0.2.0/24"
+  availability_zone = "${var.Region}b"
+  # Enable Auto-assigned IPv4
+  map_public_ip_on_launch = true
+  tags = {
+    Name = "Public Subnet 2"
+  }
+}
+
 
 #Create  Private Subnet in Availability Zones: A
 
 resource "aws_subnet" "Private_Subnet_A" {
   vpc_id            = aws_vpc.VPC_Pipeline.id
-  cidr_block        = "10.0.2.0/24"
+  cidr_block        = "10.0.3.0/24"
   availability_zone = "${var.Region}a"
   # Disable Auto-assigned IPv4
   map_public_ip_on_launch = false
@@ -190,7 +203,7 @@ resource "aws_eks_cluster" "main" {
   role_arn = aws_iam_role.eks_cluster.arn
 
   vpc_config {
-    subnet_ids = [aws_subnet.Public_Subnet_A.id, aws_subnet.Private_Subnet_A.id]
+    subnet_ids = [aws_subnet.Public_Subnet_A.id, aws_subnet.Public_Subnet_B, aws_subnet.Private_Subnet_A.id]
   }
 
   depends_on = [aws_iam_role_policy_attachment.eks_cluster_policy]
