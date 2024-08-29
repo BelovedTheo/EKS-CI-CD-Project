@@ -27,10 +27,10 @@ phases:
     commands:
       - echo "Pushing Docker image to ECR..."
       - docker push 767397938697.dkr.ecr.us-west-2.amazonaws.com/pacman1:latest
-      - aws eks get-token --cluster-name EKScluster | kubectl apply -f -
+      - echo "Configuring kubectl..."
       - aws eks update-kubeconfig --name EKScluster --region us-west-2
-      - echo Applying Kubernetes manifests...
-      - kubectl apply -f Kubernetes Manifest/
+      - echo "Applying Kubernetes manifests..."
+      - kubectl apply -f "Kubernetes Manifest/"
+      - echo "Checking deployment status..."
+      - kubectl get pods
       - echo Build completed on `date`
-      
-
