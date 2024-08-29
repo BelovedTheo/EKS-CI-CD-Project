@@ -255,7 +255,7 @@ resource "aws_iam_role_policy_attachment" "eks_worker_node_policy" {
 
 resource "aws_eks_node_group" "public" {
   cluster_name    = aws_eks_cluster.main.name
-  node_group_name = "${var.project_name}-public-node-group"
+  node_group_name = "public-node-group"
   node_role_arn   = aws_iam_role.eks_nodes.arn
   subnet_ids      = [aws_subnet.Public_Subnet_A.id]
 
@@ -272,7 +272,7 @@ resource "aws_eks_node_group" "public" {
 
 resource "aws_eks_node_group" "private" {
   cluster_name    = aws_eks_cluster.main.name
-  node_group_name = "${var.project_name}-private-node-group"
+  node_group_name = "private-node-group"
   node_role_arn   = aws_iam_role.eks_nodes.arn
   subnet_ids      = [aws_subnet.Private_Subnet_A.id]
 
