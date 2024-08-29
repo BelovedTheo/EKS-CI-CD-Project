@@ -4,17 +4,17 @@
 #---------------------------
 
 output "VPC_ID" {
-  value       = aws_vpc.VPC.id
-  description = "My VPC ID"
+  value = aws_vpc.VPC_Pipeline.id
+  description = "The ID of the VPC"
 }
 
 output "VPC_CIDR" {
-  value       = aws_vpc.VPC.cidr_block
+  value = aws_vpc.VPC_Pipeline.cidr_block
   description = "My VPC CIDR Block"
 }
 
 output "EKS_ID" {
-  value       = aws_eks_cluster.EKS.id
+  value       = aws_eks_cluster.main
   description = "EKS Cluster Id"
 }
 output "cluster_endpoint" {
@@ -32,37 +32,22 @@ output "kubectl_config" {
   value       = module.eks.kubeconfig
 }
 
-#output "config_map_aws_auth" {
-#  description = "A kubernetes configuration to authenticate to this EKS cluster."
-#  value       = module.eks.config_map_aws_auth
-#}
-
 output "Region" {
   description = "AWS region."
   value       = var.Region
 }
 
-output "vpc_id" {
-  value = aws_vpc.VPC_Pipeline.id
-  description = "The ID of the VPC"
-}
-
 output "Public_A_ID" {
-  value       = aws_subnet.Public_A.id
+  value       = aws_subnet.Public_Subnet_A.id
   description = "Public Subnet A ID of VPC"
 }
 
-output "Public_B_ID" {
-  value       = aws_subnet.Public_B.id
+output "Private_A_ID" {
+  value       = aws_subnet.Private_Subnet_A.id
   description = "Public Subnet B ID of VPC"
-}
-
-output "private_subnet_ids" {
-  description = "List of private subnet IDs"
-  value       = aws_subnet.private[*].id
 }
 
 output "alb_dns_name" {
   description = "The DNS name of the load balancer"
-  value       = aws_lb.app.dns_name
+  value       = try(data.aws_lb.app.dns_name, "ALB not found or not yet created")
 }

@@ -116,19 +116,19 @@ resource "aws_security_group" "sg_eks_cluster" {
 
   dynamic "ingress" {
     for_each = [
-      {port = 80, description = "HTTP for ALB"},
-      {port = 443, description = "HTTPS"},
-      {port = 10250, description = "Kubelet API"},
+      {port = "80", description = "HTTP for ALB"},
+      {port = "443", description = "HTTPS"},
+      {port = "10250", description = "Kubelet API"},
       {port = "30000-32767", description = "NodePort Services"},
-      {port = 9090, description = "Prometheus"},
-      {port = 3000, description = "Grafana"}
+      {port = "9090", description = "Prometheus"},
+      {port = "3000", description = "Grafana"}
     ]
     content {
-      from_port   = split("-", ingress.value.port)[0]
-      to_port     = split("-", ingress.value.port)[1] == null ? split("-", ingress.value.port)[0] : split("-", ingress.value.port)[1]
+      from_port   = tonumber(split("-", ingress.value.port)[0])
+      to_port     = length(split("-", ingress.value.port)) > 1 ? tonumber(split("-", ingress.value.port)[1]) : tonumber(split("-", ingress.value.port)[0])
       protocol    = "tcp"
       cidr_blocks = ["0.0.0.0/0"]
-      description = "ingress.value.description"
+      description = ingress.value.description
     }
   }
 
