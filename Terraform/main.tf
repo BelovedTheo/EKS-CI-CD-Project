@@ -206,6 +206,10 @@ resource "aws_eks_cluster" "main" {
     subnet_ids = [aws_subnet.Public_Subnet_A.id, aws_subnet.Public_Subnet_B.id, aws_subnet.Private_Subnet_A.id]
   }
 
+  tags = {
+    "kubernetes.io/cluster/EKScluster" = "shared"
+  }
+
   depends_on = [aws_iam_role_policy_attachment.eks_cluster_policy]
 }
 
@@ -253,11 +257,21 @@ resource "aws_iam_role_policy_attachment" "eks_worker_node_policy" {
   role       = aws_iam_role.eks_nodes.name
 }
 
+resource "aws_iam_role_policy_attachment" "eks_cni_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+  role       = aws_iam_role.eks_nodes.name
+}
+
+resource "aws_iam_role_policy_attachment" "ec2_container_registry_read_only" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  role       = aws_iam_role.eks_nodes.name
+}
+
 resource "aws_eks_node_group" "public" {
   cluster_name    = aws_eks_cluster.main.name
   node_group_name = "public-node-group"
   node_role_arn   = aws_iam_role.eks_nodes.arn
-  subnet_ids      = [aws_subnet.Public_Subnet_A.id]
+  subnet_ids      = [aws_subnet.Public_Subnet_A.id, aws_subnet.Public_Subnet_B.id]
 
   scaling_config {
     desired_size = 1
@@ -267,7 +281,21 @@ resource "aws_eks_node_group" "public" {
 
   instance_types = ["t3.medium"]
 
-  depends_on = [aws_iam_role_policy_attachment.eks_worker_node_policy]
+  tags = {
+    "kubernetes.io/cluster/${aws_eks_cluster.main.name}" = "owned"
+  }
+
+  timeouts {
+    create = "20m"
+    update = "20m"
+    delete = "20m"
+  }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.eks_worker_node_policy,
+    aws_iam_role_policy_attachment.eks_cni_policy,
+    aws_iam_role_policy_attachment.ec2_container_registry_read_only,
+  ]
 }
 
 resource "aws_eks_node_group" "private" {
@@ -284,6 +312,25 @@ resource "aws_eks_node_group" "private" {
 
   instance_types = ["t3.medium"]
 
-  depends_on = [aws_iam_role_policy_attachment.eks_worker_node_policy]
+  tags = {
+    "kubernetes.io/cluster/${aws_eks_cluster.main.name}" = "owned"
+  }
+
+  timeouts {
+    create = "20m"
+    update = "20m"
+    delete = "20m"
+  }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.eks_worker_node_policy,
+    aws_iam_role_policy_attachment.eks_cni_policy,
+    aws_iam_role_policy_attachment.ec2_container_registry_read_only,
+  ]
+}
+
+resource "aws_eks_addon" "vpc_cni" {
+  cluster_name = aws_eks_cluster.main.name
+  addon_name   = "vpc-cni"
 }
 
