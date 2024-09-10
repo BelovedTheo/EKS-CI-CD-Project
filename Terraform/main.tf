@@ -130,6 +130,7 @@ resource "aws_security_group" "sg_eks_cluster" {
   dynamic "ingress" {
     for_each = [
       {port = "80", description = "HTTP for ALB"},
+      {port = "27017", description = "MongoDB"},
       {port = "443", description = "HTTPS"},
       {port = "10250", description = "Kubelet API"},
       {port = "30000-32767", description = "NodePort Services"},
@@ -235,7 +236,7 @@ resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
   role       = aws_iam_role.eks_cluster.name
 }
 
-resource "aws_iam_role" "eks_nodes" {
+resource "aws_iam_role" "eks-nodes-role" {
   name = "eks-nodes-role"
 
   assume_role_policy = jsonencode({
@@ -254,29 +255,29 @@ resource "aws_iam_role" "eks_nodes" {
 
 resource "aws_iam_role_policy_attachment" "eks_worker_node_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-  role       = aws_iam_role.eks_nodes.name
+  role       = aws_iam_role.eks-nodes-role.name
 }
 
 resource "aws_iam_role_policy_attachment" "eks_cni_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-  role       = aws_iam_role.eks_nodes.name
+  role       = aws_iam_role.eks-nodes-role.name
 }
 
 resource "aws_iam_role_policy_attachment" "ec2_container_registry_read_only" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-  role       = aws_iam_role.eks_nodes.name
+  role       = aws_iam_role.eks-nodes-role.name
 }
 
 resource "aws_iam_role_policy_attachment" "eks_node_policy" {
   policy_arn = "arn:aws:iam::767397938697:policy/EKS_ECRaccess"
-  role       = aws_iam_role.eks_nodes.name
+  role       = aws_iam_role.eks-nodes-role.name
 }
 
 
 resource "aws_eks_node_group" "public" {
   cluster_name    = aws_eks_cluster.main.name
   node_group_name = "public-node-group"
-  node_role_arn   = aws_iam_role.eks_nodes.arn
+  node_role_arn   = aws_iam_role.eks-nodes-role.arn
   subnet_ids      = [aws_subnet.Public_Subnet_A.id, aws_subnet.Public_Subnet_B.id]
 
   scaling_config {
@@ -307,7 +308,7 @@ resource "aws_eks_node_group" "public" {
 resource "aws_eks_node_group" "private" {
   cluster_name    = aws_eks_cluster.main.name
   node_group_name = "private-node-group"
-  node_role_arn   = aws_iam_role.eks_nodes.arn
+  node_role_arn   = aws_iam_role.eks-nodes-role.arn
   subnet_ids      = [aws_subnet.Private_Subnet_A.id]
 
   scaling_config {
