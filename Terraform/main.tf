@@ -281,9 +281,9 @@ resource "aws_eks_node_group" "public" {
   subnet_ids      = [aws_subnet.Public_Subnet_A.id, aws_subnet.Public_Subnet_B.id]
 
   scaling_config {
-    desired_size = 0
+    desired_size = 1
     max_size     = 1
-    min_size     = 0
+    min_size     = 1
   }
 
   instance_types = ["t3.medium"]
@@ -312,9 +312,9 @@ resource "aws_eks_node_group" "private" {
   subnet_ids      = [aws_subnet.Private_Subnet_A.id]
 
   scaling_config {
-    desired_size = 0
+    desired_size = 1
     max_size     = 1
-    min_size     = 0
+    min_size     = 1
   }
 
   instance_types = ["t3.medium"]
