@@ -20,5 +20,3 @@ spec:
         env:
         - name: MONGO_URL
           value: "mongodb://DBservice:27017/mydatabase"
-      imagePullSecrets:
-      - name: ecr-secret

@@ -1,24 +1,26 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: mongo-pv
+  name: mongodb-pv
 spec:
   capacity:
     storage: 5Gi
   accessModes:
     - ReadWriteOnce
-  hostPath:
-    path: /data/mongo
-
+  storageClassName: gp3
+  awsElasticBlockStore:
+    volumeID: vol-01da823de003e09c2
+    fsType: ext4
 ---
 
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: mongo-pvc
+  name: mongodb-pvc
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 5Gi
+  storageClassName: gp3
