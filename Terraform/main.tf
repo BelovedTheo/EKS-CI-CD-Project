@@ -282,7 +282,7 @@ resource "aws_eks_node_group" "public" {
 
   scaling_config {
     desired_size = 0
-    max_size     = 0
+    max_size     = 1
     min_size     = 0
   }
 
@@ -313,7 +313,7 @@ resource "aws_eks_node_group" "private" {
 
   scaling_config {
     desired_size = 0
-    max_size     = 0
+    max_size     = 1
     min_size     = 0
   }
 
