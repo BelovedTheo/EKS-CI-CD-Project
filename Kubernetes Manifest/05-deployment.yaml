@@ -19,4 +19,7 @@ spec:
         - containerPort: 8080
         env:
         - name: MONGO_URL
-          value: "mongodb://DBservice:27017/mydatabase"
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: MONGODB_URL

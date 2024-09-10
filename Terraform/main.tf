@@ -267,6 +267,12 @@ resource "aws_iam_role_policy_attachment" "ec2_container_registry_read_only" {
   role       = aws_iam_role.eks_nodes.name
 }
 
+resource "aws_iam_role_policy_attachment" "eks_node_policy" {
+  policy_arn = "arn:aws:iam::767397938697:policy/EKS_ECRaccess"
+  role       = aws_iam_role.eks_nodes.name
+}
+
+
 resource "aws_eks_node_group" "public" {
   cluster_name    = aws_eks_cluster.main.name
   node_group_name = "public-node-group"
